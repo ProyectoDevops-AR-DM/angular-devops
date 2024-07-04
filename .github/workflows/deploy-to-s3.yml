@@ -51,4 +51,4 @@ jobs:
           aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
 
       - name: Deploy to S3
-        run: aws s3 sync ./dist/your-angular-app s3://${{ secrets.S3_ORIGIN_BUCKET }} --delete
+        run: aws s3 sync ./dist/app-angular s3://${{ secrets.S3_ORIGIN_BUCKET }} --delete
