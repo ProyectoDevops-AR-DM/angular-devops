@@ -44,9 +44,9 @@ jobs:
         S3_BUCKET_NAME_MAIN: ${{ secrets.S3_BUCKET_NAME_MAIN }}
       run: |
         if [[ "${GITHUB_REF##*/}" == "develop" ]]; then
-          aws s3 sync ./dist/app-angular/ s3://${{ env.S3_BUCKET_NAME_DEVELOP }} --delete
+          aws s3 sync ./dist/app-angular/browser/ s3://${{ env.S3_BUCKET_NAME_DEVELOP }} --delete
         elif [[ "${GITHUB_REF##*/}" == "release" ]]; then
-          aws s3 sync ./dist/app-angular/ s3://${{ env.S3_BUCKET_NAME_RELEASE }} --delete
+          aws s3 sync ./dist/app-angular/browser/ s3://${{ env.S3_BUCKET_NAME_RELEASE }} --delete
         elif [[ "${GITHUB_REF##*/}" == "main" ]]; then
-          aws s3 sync ./dist/app-angular/ s3://${{ env.S3_BUCKET_NAME_MAIN }} --delete
+          aws s3 sync ./dist/app-angular/browser/ s3://${{ env.S3_BUCKET_NAME_MAIN }} --delete
         fi
