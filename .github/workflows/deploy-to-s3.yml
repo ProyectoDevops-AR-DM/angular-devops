@@ -1,62 +1,48 @@
-name: Github Action S3 Deploy
+name: Deploy to S3
 
 on:
-  workflow_call:
-    inputs:
-      CI_ENV:
-        required: true
-        type: string
-      CONTENTFUL_ENVIRONMENT:
-        required: true
-        type: string
-    secrets:
-      AWS_ACCESS_KEY_ID:
-        required: true
-      AWS_SECRET_ACCESS_KEY:
-        required: true
-      AWS_DEFAULT_REGION:
-        required: true
-      AWS_SESSION_TOKEN:
-        required: true
-      S3_ORIGIN_BUCKET:
-        required: true
+  push:
+    branches:
+      - develop
+      - release
+      - main
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18.19.1'  # Asegúrate de usar una versión compatible
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
 
-      - name: Install Angular CLI
-        run: npm install -g @angular/cli
+    - name: Install dependencies
+      run: npm install
 
-      - name: Install dependencies
-        run: npm ci
+    - name: Build project
+      run: npm run build --prod
 
-      - name: Build Angular app
-        run: ng build 
-      
-      - name: Print AWS Secrets (for debugging)
-        run: |
-          echo "AWS_ACCESS_KEY_ID_PROD=${{ secrets.AWS_ACCESS_KEY_ID_PROD }}"
-          echo "AWS_SECRET_ACCESS_KEY_PROD=${{ secrets.AWS_SECRET_ACCESS_KEY_PROD}}"
-          echo "AWS_SESSION_TOKEN=${{ secrets.AWS_SESSION_TOKEN }}"
-          echo "AWS_DEFAULT_REGION=${{ secrets.AWS_DEFAULT_REGION }}"
-        shell: bash
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
-
-      - name: Deploy to S3
-        run: aws s3 sync ./dist/app-angular s3://${{ secrets.S3_ORIGIN_BUCKET }} --delete
+    - name: Deploy to S3
+      env:
+        S3_BUCKET_NAME_DEVELOP: ${{ secrets.S3_BUCKET_NAME_DEVELOP }}
+        S3_BUCKET_NAME_RELEASE: ${{ secrets.S3_BUCKET_NAME_RELEASE }}
+        S3_BUCKET_NAME_MAIN: ${{ secrets.S3_BUCKET_NAME_MAIN }}
+      run: |
+        if [[ "${GITHUB_REF##*/}" == "develop" ]]; then
+          aws s3 sync ./dist/ s3://${{ env.S3_BUCKET_NAME_DEVELOP }} --delete
+        elif [[ "${GITHUB_REF##*/}" == "release" ]]; then
+          aws s3 sync ./dist/ s3://${{ env.S3_BUCKET_NAME_RELEASE }} --delete
+        elif [[ "${GITHUB_REF##*/}" == "main" ]]; then
+          aws s3 sync ./dist/ s3://${{ env.S3_BUCKET_NAME_MAIN }} --delete
+        fi
