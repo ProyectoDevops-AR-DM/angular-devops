@@ -41,6 +41,14 @@ jobs:
 
       - name: Build Angular app
         run: ng build 
+      
+      - name: Print AWS Secrets (for debugging)
+        run: |
+          echo "AWS_ACCESS_KEY_ID_PROD=${{ secrets.AWS_ACCESS_KEY_ID_PROD }}"
+          echo "AWS_SECRET_ACCESS_KEY_PROD=${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}"
+          echo "AWS_SESSION_TOKEN=${{ secrets.AWS_SESSION_TOKEN }}"
+          echo "AWS_DEFAULT_REGION=${{ secrets.AWS_DEFAULT_REGION }}"
+        shell: bash
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
