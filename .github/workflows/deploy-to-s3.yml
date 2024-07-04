@@ -23,8 +23,11 @@ jobs:
     - name: Install dependencies
       run: npm install
 
+    - name: Install Angular CLI
+      run: npm install -g @angular/cli
+
     - name: Build project
-      run: npm run build --prod
+      run: ng build --prod
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
