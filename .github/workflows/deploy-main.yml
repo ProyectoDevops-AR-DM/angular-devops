@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   build-prod:
-    uses: ProyectoDevops-AR-DM/angular-devops/.github/workflows/deploy-to-s3.yml@develop
+    uses: ProyectoDevops-AR-DM/angular-devops/.github/workflows/deploy-to-s3.yml@main
     with:
       CI_ENV: main
       CONTENTFUL_ENVIRONMENT: 'production'
