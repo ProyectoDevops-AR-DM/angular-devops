@@ -36,6 +36,12 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }} 
           aws-region: us-east-1  # Ajusta la región según sea necesario
 
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-artifacts
+          path: ./dist/app-angular
+
   deploy-develop:
     needs: build
     runs-on: ubuntu-latest
@@ -44,6 +50,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: build-artifacts
 
       - name: Deploy to S3 (Develop)
         env:
@@ -60,6 +71,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Download build artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: build-artifacts
+
       - name: Deploy to S3 (Release)
         env:
           S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME_RELEASE }}
@@ -74,6 +90,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: build-artifacts
 
       - name: Deploy to S3 (Main)
         env:
