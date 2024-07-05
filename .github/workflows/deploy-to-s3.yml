@@ -11,10 +11,6 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        branch: [develop, release, main]
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -47,11 +43,10 @@ jobs:
         S3_BUCKET_NAME_RELEASE: ${{ secrets.S3_BUCKET_NAME_RELEASE }}
         S3_BUCKET_NAME_MAIN: ${{ secrets.S3_BUCKET_NAME_MAIN }}
       run: |
-        if [ "${{ matrix.branch }}" == "develop" ]; then
-          BUCKET_NAME=${{ env.S3_BUCKET_NAME_DEVELOP }}
-        elif [ "${{ matrix.branch }}" == "release" ]; then
-          BUCKET_NAME=${{ env.S3_BUCKET_NAME_RELEASE }}
-        elif [ "${{ matrix.branch }}" == "main" ]; then
-          BUCKET_NAME=${{ env.S3_BUCKET_NAME_MAIN }}
+        if [[ "${GITHUB_REF##*/}" == "develop" ]]; then
+          aws s3 sync ./dist/app-angular/browser/ s3://${{ env.S3_BUCKET_NAME_DEVELOP }} --delete
+        elif [[ "${GITHUB_REF##*/}" == "release" ]]; then
+          aws s3 sync ./dist/app-angular/browser/ s3://${{ env.S3_BUCKET_NAME_RELEASE }} --delete
+        elif [[ "${GITHUB_REF##*/}" == "main" ]]; then
+          aws s3 sync ./dist/app-angular/browser/ s3://${{ env.S3_BUCKET_NAME_MAIN }} --delete
         fi
-        aws s3 sync ./dist/your-angular-app s3://$BUCKET_NAME --delete
