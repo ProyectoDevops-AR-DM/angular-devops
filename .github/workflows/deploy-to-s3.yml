@@ -66,4 +66,4 @@ jobs:
         AWS_REGION: us-east-1
         S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME_MAIN }}
   
-      run: aws s3 sync ./dist/app-angular s3://$S3_BUCKET_NAME --delete
+      run: aws s3 sync ./dist/app-angular s3://main-angular-devops --delete
