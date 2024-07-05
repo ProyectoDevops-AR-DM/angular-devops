@@ -28,6 +28,7 @@ jobs:
     steps:
       - name: Install dependencies
         run: npm install
+        working-directory: ./path/to/your/project
 
   install-angular-cli:
     runs-on: ubuntu-latest
@@ -35,6 +36,7 @@ jobs:
     steps:
       - name: Install Angular CLI
         run: npm install -g @angular/cli
+        working-directory: ./path/to/your/project
 
   build-project:
     runs-on: ubuntu-latest
@@ -42,6 +44,7 @@ jobs:
     steps:
       - name: Build project
         run: ng build
+        working-directory: ./path/to/your/project
 
   configure-aws-credentials:
     runs-on: ubuntu-latest
@@ -71,3 +74,4 @@ jobs:
             aws s3 sync ./dist/app-angular/browser/ s3://${{ env.S3_BUCKET_NAME_RELEASE }} --delete
           elif [[ "${GITHUB_REF##*/}" == "main" ]]; then
             aws s3 sync ./dist/app-angular/browser/ s3://${{ env.S3_BUCKET_NAME_MAIN }} --delete
+        working-directory: ./path/to/your/project
