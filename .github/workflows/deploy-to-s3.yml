@@ -40,14 +40,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Set GITHUB_REF for deploy job
+        run: echo "Current branch: ${GITHUB_REF}"
+        shell: bash
+
       - name: Download build artifacts
         uses: actions/download-artifact@v2
         with:
           name: build-artifacts
           path: ./dist/app-angular
-
-      - name: Set GITHUB_REF for deploy job
-        run: echo "GITHUB_REF=${GITHUB_REF}" >> $GITHUB_ENV
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
