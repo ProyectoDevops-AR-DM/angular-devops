@@ -40,10 +40,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set GITHUB_REF for deploy job
-        run: echo "Current branch: ${GITHUB_REF}"
-        shell: bash
-
+      - run: |
+          echo "Current branch: $GITHUB_REF"
+      
       - name: Download build artifacts
         uses: actions/download-artifact@v2
         with:
