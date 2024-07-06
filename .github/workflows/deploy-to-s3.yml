@@ -71,3 +71,4 @@ jobs:
             aws s3 sync ./dist/app-angular/browser/ s3://${{ env.S3_BUCKET_NAME_RELEASE }} --delete
           elif [[ "${branch_name}" == "main" ]]; then
             aws s3 sync ./dist/app-angular/browser/ s3://${{ env.S3_BUCKET_NAME_MAIN }} --delete
+          fi
