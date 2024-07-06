@@ -53,6 +53,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1  # Ajusta la región según sea necesario
+          
+      - name: List files for debugging
+        run: ls -R ./dist/app-angular
+
 
       - name: Deploy to S3
         env:
