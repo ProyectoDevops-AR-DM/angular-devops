@@ -40,8 +40,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - run: |
-          echo "Current branch: $GITHUB_REF"
+      - name: Print current branch
+        run: |
+          branch_name=${GITHUB_REF#refs/heads/}
+          echo "Current branch: $branch_name"
       
       - name: Download build artifacts
         uses: actions/download-artifact@v2
@@ -63,9 +65,9 @@ jobs:
           S3_BUCKET_NAME_RELEASE: ${{ secrets.S3_BUCKET_NAME_RELEASE }}
           S3_BUCKET_NAME_MAIN: ${{ secrets.S3_BUCKET_NAME_MAIN }}
         run: |
-          if [[ "${GITHUB_REF##*/}" == "develop" ]]; then
+          if [[ "${branch_name}" == "develop" ]]; then
             aws s3 sync ./dist/app-angular/browser/ s3://${{ env.S3_BUCKET_NAME_DEVELOP }} --delete
-          elif [[ "${GITHUB_REF##*/}" == "release" ]]; then
+          elif [[ "${branch_name}" == "release" ]]; then
             aws s3 sync ./dist/app-angular/browser/ s3://${{ env.S3_BUCKET_NAME_RELEASE }} --delete
-          elif [[ "${GITHUB_REF##*/}" == "main" ]]; then
+          elif [[ "${branch_name}" == "main" ]]; then
             aws s3 sync ./dist/app-angular/browser/ s3://${{ env.S3_BUCKET_NAME_MAIN }} --delete
