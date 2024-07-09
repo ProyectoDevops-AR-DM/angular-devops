@@ -59,7 +59,7 @@ jobs:
 
       - name: Run SonarCloud analysis
         env:
-          SONAR_TOKEN: 3f7ab9c7a81c8785eae2b532602672ff3cfd26ef
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_PROJECT_KEY: ProyectoDevops-AR-DM_angular-devops
         run: |
           sonar-scanner \
