@@ -1,5 +1,4 @@
 name: Deploy to S3
-
 on:
   push:
     branches:
@@ -69,63 +68,14 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.login=$SONAR_TOKEN
 
-  terraform:
-    runs-on: ubuntu-latest
-    needs: [build, sonarcloud]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set branch name
-        id: branch_name
-        run: echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: 1.0.11
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: ${{secrets.AWS_REGION}} 
-
-      - name: Initialize Terraform
-        run: terraform init
-
-      - name: Apply Terraform
-        id: apply_terraform
-        run: |
-          if [[ "$BRANCH_NAME" == "develop" ]]; then
-            terraform apply -auto-approve -var="bucket_name=${{ secrets.S3_BUCKET_NAME_DEVELOP }}" -var="branch_name=${BRANCH_NAME}"
-          elif [[ "$BRANCH_NAME" == "release" ]]; then
-            terraform apply -auto-approve -var="bucket_name=${{ secrets.S3_BUCKET_NAME_RELEASE }}" -var="branch_name=${BRANCH_NAME}"
-          elif [[ "$BRANCH_NAME" == "main" ]]; then
-            terraform apply -auto-approve -var="bucket_name=${{ secrets.S3_BUCKET_NAME_MAIN }}" -var="branch_name=${BRANCH_NAME}"
-          fi
-
-      - name: Extract bucket name from Terraform output
-        run: |
-          bucket_name=$(terraform output -raw bucket_name | tr -d '\r')
-          echo "::set-output name=bucket_name::$bucket_name"
-
-      - name: Verify bucket name
-        run: | 
-          echo "The bucket name is: ${{ env.bucket_name }}"
-
-
   deploy:
     runs-on: ubuntu-latest
-    needs: [build, sonarcloud, terraform]
+    needs: [build, sonarcloud]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Set branch name
-        id: branch_name
         run: echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
 
       - name: Print current branch
@@ -145,13 +95,18 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: ${{secrets.AWS_REGION}} 
-
-      - name: Verify bucket name
-        run: |
-          echo "The bucket name is: ${{ steps.extract_bucket_name.outputs.bucket_name }}"
-
+          aws-region: us-east-1  # Ajusta la región según sea necesario
 
       - name: Deploy to S3
+        env:
+          S3_BUCKET_NAME_DEVELOP: ${{ secrets.S3_BUCKET_NAME_DEVELOP }}
+          S3_BUCKET_NAME_RELEASE: ${{ secrets.S3_BUCKET_NAME_RELEASE }}
+          S3_BUCKET_NAME_MAIN: ${{ secrets.S3_BUCKET_NAME_MAIN }}
         run: |
-          aws s3 sync ./dist/app-angular/browser/ s3://${{ steps.extract_bucket_name.outputs.bucket_name }} --delete}}
+          if [[ "$BRANCH_NAME" == "develop" ]]; then
+            aws s3 sync ./dist/app-angular/browser/ s3://${{ env.S3_BUCKET_NAME_DEVELOP }} --delete
+          elif [[ "$BRANCH_NAME" == "release" ]]; then
+            aws s3 sync ./dist/app-angular/browser/ s3://${{ env.S3_BUCKET_NAME_RELEASE }} --delete
+          elif [[ "$BRANCH_NAME" == "main" ]]; then
+            aws s3 sync ./dist/app-angular/browser/ s3://${{ env.S3_BUCKET_NAME_MAIN }} --delete
+          fi
