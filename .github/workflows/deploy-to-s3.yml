@@ -110,7 +110,7 @@ jobs:
       - name: Extract bucket name from Terraform output
         run: |
           bucket_name=$(terraform output -raw bucket_name | tr -d '\r')
-          echo "bucket_name=${bucket_name}" >> $GITHUB_ENV
+          echo "bucket_name=${bucket_name}"
 
   deploy:
     runs-on: ubuntu-latest
