@@ -110,7 +110,7 @@ jobs:
       - name: Extract bucket name from Terraform output
         run: |
           bucket_name=$(terraform output -raw bucket_name | tr -d '\r')
-          echo "bucket_name=${bucket_name}"
+          echo "::set-output name=bucket_name::$bucket_name"
 
       - name: Verify bucket name
         run: | 
@@ -148,11 +148,10 @@ jobs:
           aws-region: ${{secrets.AWS_REGION}} 
 
       - name: Verify bucket name
-        run: | 
-          echo "The bucket name is: ${{ env.bucket_name }}"
+        run: |
+          echo "The bucket name is: ${{ steps.extract_bucket_name.outputs.bucket_name }}"
+
 
       - name: Deploy to S3
         run: |
-          aws s3 sync ./dist/app-angular/browser/ s3://${{ env.bucket_name }} --delete
-        env:
-          bucket_name: ${{ env.bucket_name }}
+          aws s3 sync ./dist/app-angular/browser/ s3://${{ steps.extract_bucket_name.outputs.bucket_name }} --delete}}
