@@ -110,11 +110,10 @@ jobs:
             -var="branch_name=${BRANCH_NAME}"
           fi
 
-      - name: Get bucket name
-        id: bucket_output
+      - name: Extract bucket name from Terraform output
         run: |
-          echo "bucket_name=$(terraform output -raw bucket_name)" >> bucket_name.env
-          echo "BUCKET_NAME=$(terraform output -raw bucket_name)" >> $GITHUB_ENV
+          bucket_name=$(terraform output -raw bucket_name)
+          echo "bucket_name=${bucket_name}" >> $GITHUB_ENV
 
   deploy:
     runs-on: ubuntu-latest
@@ -147,7 +146,5 @@ jobs:
           aws-region: ${{secrets.AWS_REGION}} 
 
       - name: Deploy to S3
-        env:
-          BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
         run: |
-          aws s3 sync ./dist/app-angular/browser/ s3://${BUCKET_NAME} --delete
+          aws s3 sync ./dist/app-angular/browser/ s3://${{ env.bucket_name }} --delete
