@@ -100,11 +100,14 @@ jobs:
         id: apply_terraform
         run: |
           if [[ "$BRANCH_NAME" == "develop" ]]; then
-            terraform apply -auto-approve -var="bucket_name=${{ secrets.S3_BUCKET_NAME_DEVELOP }}"
+            terraform apply -auto-approve -var="bucket_name=${{ secrets.S3_BUCKET_NAME_DEVELOP }}" \
+            -var="branch_name=${BRANCH_NAME}"
           elif [[ "$BRANCH_NAME" == "release" ]]; then
-            terraform apply -auto-approve -var="bucket_name=${{ secrets.S3_BUCKET_NAME_RELEASE }}"
+            terraform apply -auto-approve -var="bucket_name=${{ secrets.S3_BUCKET_NAME_RELEASE }}" \
+            -var="branch_name=${BRANCH_NAME}"
           elif [[ "$BRANCH_NAME" == "main" ]]; then
-            terraform apply -auto-approve -var="bucket_name=${{ secrets.S3_BUCKET_NAME_MAIN }}"
+            terraform apply -auto-approve -var="bucket_name=${{ secrets.S3_BUCKET_NAME_MAIN }}" \
+            -var="branch_name=${BRANCH_NAME}"
           fi
 
       - name: Get bucket name
